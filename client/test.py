@@ -1,9 +1,10 @@
 import binascii
+import os
 import requests
 from pytun import TunTapDevice
 from Cryptodome.Cipher import AES
 
-KEY = b'\xe0m2\xbem\x1b\xee\xba\xfa\xd6\xa4CO/\xa7#'
+KEY = binascii.a2b_base64(os.getenv('HTTPTUN_KEY'))
 URL = "http://127.0.0.1:8080/"
 
 def decrypt(ciphertext, nonce, tag):

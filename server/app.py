@@ -8,10 +8,9 @@ from Cryptodome.Cipher import AES
 import binascii
 import logging
 import json
+import os
 
-KEY = b'\xe0m2\xbem\x1b\xee\xba\xfa\xd6\xa4CO/\xa7#'
-
-logger = logging.getLogger()
+KEY = binascii.a2b_base64(os.getenv('HTTPTUN_KEY'))
 
 tun = TunTapDevice(name="http_tun")
 tun.addr = '10.8.0.1'
