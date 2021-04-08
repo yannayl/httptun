@@ -59,15 +59,19 @@ def index():
     tun.write(plaintext)
     try:
         ret = tun2http_queue.get_nowait()
-        ciphertext, nonce, tag = encrypt(ret)
-    except:
+    except Empty:
         return ''
     
-    return jsonify({
-        'ciphertext': binascii.b2a_base64(ciphertext).decode('utf-8'),
-        'nonce': binascii.b2a_base64(nonce).decode('utf-8'),
-        'tag': binascii.b2a_base64(tag).decode('utf-8'),
-    })
+    try:
+        ciphertext, nonce, tag = encrypt(ret)
+        return jsonify({
+            'ciphertext': binascii.b2a_base64(ciphertext).decode('utf-8'),
+            'nonce': binascii.b2a_base64(nonce).decode('utf-8'),
+            'tag': binascii.b2a_base64(tag).decode('utf-8'),
+        })
+    except:
+        abort(401)
+    
 
 spawn(read_tun)
 http_server = WSGIServer(('', 80), app)
