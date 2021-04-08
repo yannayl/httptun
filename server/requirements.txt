@@ -5,6 +5,7 @@ greenlet==1.0.0
 itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
+pycryptodomex==3.10.1
 python-pytun==2.4.1
 Werkzeug==1.0.1
 zope.event==4.5.0
