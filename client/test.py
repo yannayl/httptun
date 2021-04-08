@@ -5,7 +5,7 @@ from pytun import TunTapDevice
 from Cryptodome.Cipher import AES
 
 KEY = binascii.a2b_base64(os.getenv('HTTPTUN_KEY'))
-URL = "http://127.0.0.1:8080/"
+URL = os.getenv('HTTPTUN_URL')
 
 def decrypt(ciphertext, nonce, tag):
     cipher = AES.new(KEY, AES.MODE_EAX, nonce=nonce)
