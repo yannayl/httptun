@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
 
-iptables --table nat --append POSTROUTING --jump MASQUERADE
+iptables-legacy --table nat --append POSTROUTING --jump MASQUERADE
 
 mkdir -p /dev/net && mknod /dev/net/tun c 10 200
 

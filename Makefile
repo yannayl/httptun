@@ -6,7 +6,7 @@ GCLOUD_CONFIG = .gcloudconfig
 GCLOUD = CLOUDSDK_CONFIG=.gcloudconfig gcloud
 GCLOUD_PROJECT = $(shell $(GCLOUD) config get-value project)
 SERVER_IMAGE_TAG = gcr.io/$(GCLOUD_PROJECT)/server
-SERVER_NAME = server
+SERVER_NAME ?= server
 SERVER_ZONE = northamerica-northeast1-a
 
 .PHONY: build-server
@@ -15,7 +15,7 @@ build-server: server/Dockerfile server/app.py server/run.sh
 	
 .PHONY: run-server-local
 run-server-local: build-server
-	$(DOCKER) run -e HTTPTUN_KEY=$(HTTPTUN_KEY) --rm -it  -p 8080:80 --cap-add net_admin --sysctl net.ipv4.ip_forward=1 http_tunner:server
+	$(DOCKER) run -e HTTPTUN_KEY=$(HTTPTUN_KEY) --rm -it -p 8080:80/tcp --cap-add net_admin --sysctl net.ipv4.ip_forward=1 http_tunner:server
 
 .PHONY: run-client-local
 run-client-local:
@@ -24,7 +24,7 @@ run-client-local:
 
 .PHONY: run-client-remote
 run-client-remote:
-	HTTPTUN_URL=http://$(shell $(GCLOUD) compute instances describe $(SERVER_NAME) --zone $(SERVER_ZONE) --format='get(networkInterfaces[0].networkIP)') \
+	HTTPTUN_URL=http://$(shell $(GCLOUD) compute instances describe $(SERVER_NAME) --zone $(SERVER_ZONE) --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
 		HTTPTUN_KEY=$(HTTPTUN_KEY) sudo -E python3 client/test.py
 
 .PHONY: push-server
@@ -45,4 +45,4 @@ create-server-remote:
 
 .PHONY: delete-server-remote
 delete-server-remote:
-	$(GCLOUD) compute instances delete $(SERVER_NAME)
+	$(GCLOUD) -q compute instances delete $(SERVER_NAME) --zone $(SERVER_ZONE)
