@@ -1,4 +1,4 @@
-all: run-local-server
+all: run-server-local
 
 DOCKER = docker --config .docker
 HTTPTUN_KEY = $(shell base64 < .keyfile)
@@ -13,12 +13,12 @@ SERVER_ZONE = northamerica-northeast1-a
 build-server: server/Dockerfile server/app.py server/run.sh
 	$(DOCKER) build -t http_tunner:server server
 	
-.PHONY: run-local-server
-run-local-server: build-server
+.PHONY: run-server-local
+run-server-local: build-server
 	$(DOCKER) run -e HTTPTUN_KEY=$(HTTPTUN_KEY) --rm -it  -p 8080:80 --cap-add net_admin --sysctl net.ipv4.ip_forward=1 http_tunner:server
 
-.PHONY: run-client
-run-client:
+.PHONY: run-client-local
+run-client-local:
 	HTTPTUN_URL=http://127.0.0.1:8080 \
 		HTTPTUN_KEY=$(HTTPTUN_KEY) sudo -E python3 client/test.py
 
@@ -32,8 +32,8 @@ push-server: build-server
 	$(DOCKER) tag http_tunner:server $(SERVER_IMAGE_TAG)
 	CLOUDSDK_CONFIG=.gcloudconfig $(DOCKER) push $(SERVER_IMAGE_TAG)
 
-.PHONY: create-remote-server
-create-remote-server:
+.PHONY: create-server-remote
+create-server-remote:
 	$(GCLOUD) compute instances create-with-container $(SERVER_NAME) \
 		--container-env HTTPTUN_KEY=$(HTTPTUN_KEY) \
 		--container-image $(SERVER_IMAGE_TAG) \
@@ -43,6 +43,6 @@ create-remote-server:
 		--tags http-server \
 		--zone $(SERVER_ZONE)
 
-.PHONY: delete-remote-server
-delete-remote-serve:
+.PHONY: delete-server-remote
+delete-server-remote:
 	$(GCLOUD) compute instances delete $(SERVER_NAME)
